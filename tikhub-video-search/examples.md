@@ -69,3 +69,26 @@ Expected behavior:
   - `available_on_request` when a downstream call can request it but was not called.
   - `restricted` when platform restrictions are likely.
   - `unknown` when TikHub did not provide enough information.
+
+## On-Demand Download Resolve
+
+System/user:
+
+```text
+Resolve download URL for this one material only:
+{
+  "material_id": "youtube:WXMjsJuBs_s",
+  "platform": "youtube",
+  "platform_video_id": "WXMjsJuBs_s",
+  "original_url": "https://www.youtube.com/watch?v=WXMjsJuBs_s"
+}
+```
+
+Expected behavior:
+
+- `result_type`: `download_resolve`
+- Do not run broad search.
+- For YouTube, inspect stream options with `get_video_streams_v2`, choose a practical mp4/video stream when possible, and use `get_signed_stream_url` when an `itag` is required.
+- Return `download.status="available"` with `download.url` only when TikHub returns a direct or signed URL.
+- If only adaptive video/audio streams are available, prefer a simple playable stream for preview and warn that muxed download may require a downstream downloader.
+- Include expiry and platform restrictions in `warnings`.

@@ -141,6 +141,65 @@ Use this shape when `result_type` is `director_plan` or `hybrid`:
 }
 ```
 
+## Download Resolve Shape
+
+Use this shape when `result_type` is `download_resolve`:
+
+```json
+{
+  "success": true,
+  "result_type": "download_resolve",
+  "material_id": "youtube:WXMjsJuBs_s",
+  "platform": "youtube",
+  "platform_video_id": "WXMjsJuBs_s",
+  "original_url": "https://www.youtube.com/watch?v=...",
+  "download": {
+    "status": "available",
+    "url": "https://signed-or-direct-download-url",
+    "expires_at": "2026-07-02T12:00:00Z",
+    "format": "mp4",
+    "quality": "720p"
+  },
+  "preview": {
+    "status": "available",
+    "type": "stream",
+    "url": "https://signed-or-direct-preview-url",
+    "expires_at": "2026-07-02T12:00:00Z"
+  },
+  "tikhub": {
+    "endpoint": "/api/v1/youtube/web_v2/get_signed_stream_url",
+    "request_id": "TikHub request id",
+    "params": {
+      "video_id": "WXMjsJuBs_s"
+    }
+  },
+  "warnings": ["signed_url_may_expire"]
+}
+```
+
+If no usable URL is available:
+
+```json
+{
+  "success": false,
+  "result_type": "download_resolve",
+  "material_id": "youtube:WXMjsJuBs_s",
+  "platform": "youtube",
+  "platform_video_id": "WXMjsJuBs_s",
+  "original_url": "https://www.youtube.com/watch?v=...",
+  "download": {
+    "status": "restricted",
+    "url": null,
+    "expires_at": null,
+    "format": null,
+    "quality": null
+  },
+  "blocking_reason": "TikHub did not return a direct or signed downloadable URL.",
+  "tikhub": {},
+  "warnings": []
+}
+```
+
 ## Field Rules
 
 - `material_id` must be deterministic: `<platform>:<platform_video_id>` when possible.

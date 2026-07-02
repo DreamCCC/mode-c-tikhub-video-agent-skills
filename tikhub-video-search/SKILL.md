@@ -13,6 +13,7 @@ Support two user modes:
 
 - `flat_search`: the user directly asks for videos or a video list.
 - `director_plan`: the user provides a story, script, visual description, emotional direction, or segmented creative intent.
+- `download_resolve`: the caller provides one already selected material and asks for a playable/downloadable URL.
 
 ## Required References
 
@@ -35,29 +36,36 @@ Read these files before doing the task:
    - Use `flat_search` for direct requests.
    - Use `director_plan` when the request contains story/script/description/segment needs.
    - Use `hybrid` only when both a full list and segment-specific candidates are useful.
+   - Use `download_resolve` when the input includes a single material object and asks to obtain `download.url`.
 
-3. Build a conservative TikHub query plan.
+3. For `download_resolve`, do not perform broad search.
+   - Use the provided `platform`, `platform_video_id`, `original_url`, `material_id`, and existing `tikhub` metadata.
+   - Call the most direct TikHub detail/stream/download endpoint for that platform.
+   - Return one JSON object using the Download Resolve shape in `output-contract.md`.
+   - If no direct download URL is available, return `success=false` or `download.status="restricted"` with a clear `blocking_reason` or warning.
+
+4. Build a conservative TikHub query plan.
    - Start with 1-4 platforms most likely to contain the requested material.
    - Use broader all-platform search only if the user explicitly asks for full-web coverage or initial results are weak.
    - Avoid expensive detail/download calls until search results look relevant.
 
-4. Call TikHub.
+5. Call TikHub.
    - Read `TIKHUB_API_KEY` from the runtime environment.
    - Use `Authorization: Bearer $TIKHUB_API_KEY`.
    - Prefer search endpoints first, then detail endpoints for shortlisted candidates, then preview/download endpoints only when needed.
    - Record endpoint path, platform, request parameters, status, TikHub `request_id`, and pagination token when returned.
 
-5. Normalize results.
+6. Normalize results.
    - Convert platform-specific fields into the material schema in `output-contract.md`.
    - Preserve TikHub metadata and original platform URLs.
    - Include tags, description, author, duration, thumbnails, preview URLs, and download URLs only when returned or safely derived.
 
-6. Evaluate fit.
+7. Evaluate fit.
    - Score semantic relevance, visual usefulness, freshness, source quality, duration fit, and platform reliability.
    - For `director_plan`, assign 3-8 candidates per segment by default.
    - If results are weak, broaden the query once and document the fallback.
 
-7. Return JSON only.
+8. Return JSON only.
    - Include assumptions, warnings, and query trace.
    - Include preview/download limitations.
    - Never include secrets.
